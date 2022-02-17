@@ -1,0 +1,1 @@
+cmd_/home/chikuma/tutorials/02_dev_number/dev_number.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000  --build-id  -T ./scripts/module-common.lds -o /home/chikuma/tutorials/02_dev_number/dev_number.ko /home/chikuma/tutorials/02_dev_number/dev_number.o /home/chikuma/tutorials/02_dev_number/dev_number.mod.o;  true
