@@ -11,7 +11,7 @@ MODULE_DESCRIPTION("Register a device number and implement some callback functio
 
 /* Buffer for data */
 static char buffer[255];
-static int buffer_pointer;
+static int buffer_pointer = 0;
 
 /* variables for device and device class */
 static dev_t device_number;
@@ -49,7 +49,7 @@ static ssize_t driver_write(struct file *filp, const char *user_buffer, size_t c
 	to_copy = min(count, sizeof(buffer));	// size = count or 255, depends on which is smaller
 
 	/* Copy data to user */
-	not_copied = copy_to_user(buffer, user_buffer, to_copy);
+	not_copied = copy_from_user(buffer, user_buffer, to_copy);
 	buffer_pointer = to_copy;
 
 	/* calculate data */
@@ -83,8 +83,6 @@ static struct file_operations fops = {
 	.read = driver_read,
 	.write = driver_write
 };
-
-#define MAJOR_NUMBER 90
 
 /**
  * @brief This function is called, when the module is loaded into the kernel
@@ -131,7 +129,7 @@ AddError:
 FileError:
 	class_destroy(my_class);
 ClassError:
-	unregister_chrdev(device_number, DRIVER_NAME);
+	unregister_chrdev(device_number, 1);
 	return -1;
 }
 
@@ -142,9 +140,8 @@ static void __exit ModuleExit(void) {
 	cdev_del(&my_device);
 	device_destroy(my_class, device_number);
 	class_destroy(my_class);
-	unregister_chrdev(device_number, DRIVER_NAME);
+	unregister_chrdev(device_number, 1);
 
-	unregister_chrdev(MAJOR_NUMBER, "dev_number");
 	printk("Goodbye, Kernel\n");
 }
 
