@@ -21,10 +21,6 @@ static struct cdev my_device;
 #define DRIVER_NAME "test_driver"
 #define DRIVER_CLASS "test_module_class"
 
-static void check_filep(struct file* filp) {
-	
-}
-
 /**
  * @brief Read data out of the buffer
  */
