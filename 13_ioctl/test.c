@@ -10,7 +10,7 @@ int main() {
     int answer;
     struct mystruct test = {35, "chikuma"};
 
-    int dev = open("/dev/dummy", O_RDONLY);
+    int dev = open("/dev/ioctl_test", O_RDONLY);
     if (dev == -1) {
         printf("Opening was not possible!\n");
         return -1;
@@ -28,8 +28,19 @@ int main() {
     ioctl(dev, GREETER, &test);
 
     printf("Opening was successful!\n");
+
+    int n = 10;
+    int* list = malloc(sizeof(int) * n);
+
+
+    for (size_t i = 0; i < n; i++) list[i] = i;
+
+    struct TestData data = {list, n};
+    ioctl(dev, READ, &data);
+    
     close(dev);
 
+    free(list);
 
     return 0;
 }

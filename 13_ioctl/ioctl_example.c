@@ -3,6 +3,7 @@
 #include <linux/fs.h>
 #include <linux/ioctl.h>
 #include <linux/uaccess.h>
+#include <linux/slab.h>
 
 #include "ioctl_example.h"
 
@@ -32,8 +33,23 @@ static int driver_close(struct inode *device_file, struct file *instance) {
 
 int32_t answer = 42;
 
+void getTestData(struct TestData* data, const void* __user u_list) {
+	printk("n=%d\n", data->n);
+	data->list = kmalloc(data->n * sizeof(int), GFP_KERNEL);
+	copy_from_user(data->list, u_list, data->n * sizeof(int));
+
+	size_t i;
+	for (i = 0; i < data->n; i++) {
+		printk("element %d in list: %d\n", i, data->list[i]);
+	}
+
+	kfree(data->list);
+}
+
 static long int my_ioctl(struct file *filp, unsigned cmd, unsigned long args) {
 	struct mystruct test;
+	struct TestData data;
+	struct TestData* __user u_data = args;
 	switch (cmd) {
 		case WR_VALUE:
 			if (copy_from_user(&answer, (int32_t *)args, sizeof(answer)))
@@ -49,6 +65,12 @@ static long int my_ioctl(struct file *filp, unsigned cmd, unsigned long args) {
 			if (copy_from_user(&test, (int32_t *)args, sizeof(test)))
 				printk("ioctl_example - Error copying data from user\n");
 			else printk("icotl_example - %d greets to %s\n", test.repeat, test.name);
+			break;
+		case READ:
+			if (copy_from_user(&data, u_data, sizeof(struct TestData))) {
+				printk("ioctl_example - error copying test data from user\n");
+			}
+			else getTestData(&data, u_data->list);
 			break;
 	}
 	return 0;
