@@ -5,12 +5,12 @@
 #include <linux/uaccess.h>
 #include <linux/slab.h>
 
-#include "ioctl_example.h"
+#include "task_example.h"
 
 /* Meta Information */
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Shao-Tse -Chikuma Chien");
-MODULE_DESCRIPTION("IOCTL example");
+MODULE_DESCRIPTION("task_struct example");
 
 int counter;
 
@@ -20,7 +20,7 @@ int counter;
  * Name of the function could be named to any name preferred, but the arguments should be the same.
  */
 static int driver_open(struct inode *device_file, struct file *instance) {
-	printk("ioctl_example - open was called\n");
+	printk("task_example - open was called\n");
 	return 0;
 }
 
@@ -29,7 +29,7 @@ static int driver_open(struct inode *device_file, struct file *instance) {
  * Name of the function could be named to any name preferred, but the arguments should be the same.
  */
 static int driver_close(struct inode *device_file, struct file *instance) {
-	printk("ioctl_example - close was called\n");
+	printk("task_example - close was called\n");
 	return 0;
 }
 
@@ -50,6 +50,12 @@ void getTestData(struct TestData* data, const void* __user u_list) {
 	kfree(data->list);
 }
 
+void getCallerProcessInfo(void) {
+	struct task_struct *p = current;
+
+	printk("task_example - Caller process PID=%d\n", p->pid);
+}
+
 static long int my_ioctl(struct file *filp, unsigned cmd, unsigned long args) {
 	struct mystruct test;
 	struct TestData data;
@@ -57,24 +63,27 @@ static long int my_ioctl(struct file *filp, unsigned cmd, unsigned long args) {
 	switch (cmd) {
 		case WR_VALUE:
 			if (copy_from_user(&answer, (int32_t *)args, sizeof(answer)))
-				printk("ioctl_example - Error copying data from user\n");
-			else printk("icotl_example - Update the answer to %d\n", answer);
+				printk("task_example - Error copying data from user\n");
+			else printk("task_example - Update the answer to %d\n", answer);
 			break;
 		case RD_VALUE:
 			if (copy_to_user(&answer, (int32_t *)args, sizeof(answer)))
-				printk("ioctl_example - Error copying data from user\n");
-			else printk("icotl_example - The answer was copied %d\n", answer);
+				printk("task_example - Error copying data from user\n");
+			else printk("task_example - The answer was copied %d\n", answer);
 			break;
 		case GREETER:
 			if (copy_from_user(&test, (int32_t *)args, sizeof(test)))
-				printk("ioctl_example - Error copying data from user\n");
-			else printk("icotl_example - %d greets to %s\n", test.repeat, test.name);
+				printk("task_example - Error copying data from user\n");
+			else printk("task_example - %d greets to %s\n", test.repeat, test.name);
 			break;
 		case READ:
 			if (copy_from_user(&data, u_data, sizeof(struct TestData))) {
-				printk("ioctl_example - error copying test data from user\n");
+				printk("task_example - error copying test data from user\n");
 			}
 			else getTestData(&data, u_data->list);
+			break;
+		case INFO:
+			getCallerProcessInfo();
 			break;
 	}
 	return 0;
@@ -99,11 +108,11 @@ static int __init ModuleInit(void) {
 	printk("Hello, Kernel!\n");
 	/* register device number */
 	
-	retval = register_chrdev(MAJOR_NUMBER, "ioctl_example", &fops);	/* major device number, name, file_operations to associate with */
+	retval = register_chrdev(MAJOR_NUMBER, "task_example", &fops);	/* major device number, name, file_operations to associate with */
 	if (retval == 0)	// if the major device number is free
-		printk("ioctl_example - registered device number MAJOR: %d, MINOR: %d\n", MAJOR_NUMBER, 0);
+		printk("task_example - registered device number MAJOR: %d, MINOR: %d\n", MAJOR_NUMBER, 0);
 	else if (retval > 0)
-		printk("ioctl_example - registered device number MAJOR: %d, MINOR: %d\n", retval>>20, retval&0xFFFFF);
+		printk("task_example - registered device number MAJOR: %d, MINOR: %d\n", retval>>20, retval&0xFFFFF);
 	else {
 		printk("could not register device number");
 		return -1;
@@ -116,7 +125,7 @@ static int __init ModuleInit(void) {
  * @brief This function is called, when the module is removed from the kernel
  */
 static void __exit ModuleExit(void) {
-	unregister_chrdev(MAJOR_NUMBER, "ioctl_example");
+	unregister_chrdev(MAJOR_NUMBER, "task_example");
 	printk("Goodbye, Kernel\n");
 }
 
