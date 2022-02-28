@@ -67,7 +67,7 @@ void remove_element_from_hashtable(pid_t pid) {
         printk("hash_table_example: match for key %u: data = %d, remove\n",
                pid, cur->data);
 
-        // delete the entry
+        // delete the entry, probably cause memory leak for the hash table implmented in linux
         hash_del_rcu(&(cur->node));
     }
 }

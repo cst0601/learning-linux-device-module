@@ -21,6 +21,7 @@ int main(int argc, char * argv[]) {
 
     ioctl(dev, INSERT, &data);
     ioctl(dev, LIST, &data);
+    ioctl(dev, REMOVE, &data);
 
     close(dev);
 
