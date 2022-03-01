@@ -19,8 +19,10 @@ int main(int argc, char * argv[]) {
 
     int data = 10;
     int del_target = 20;
-    ioctl(dev, INSERT, del_target);
+
+    
     for (int i = 0; i < 10; i++) {
+        ioctl(dev, INSERT, &data);
         ioctl(dev, INSERT, &data);
         data += 10;
     }

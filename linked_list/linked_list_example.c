@@ -54,13 +54,15 @@ void remove_element_from_linkedlist(int32_t data)
 {
     printk("linked_list_example: removing all nodes with data=%d\n", data);
     struct list_head* position = NULL;
+    struct list_head* n = NULL;
     struct mystruct* current_node = NULL;
 
-    list_for_each(position, &my_linked_list) {
+    list_for_each_safe(position, n, &my_linked_list) {
         current_node = list_entry(position, struct mystruct, node);
         if (current_node->data == data) {
             printk("linked_list_example: node with data=%d found, delete\n", data);
             list_del(position);
+            kfree(current_node);
         }
     }
 }
@@ -68,11 +70,13 @@ void remove_element_from_linkedlist(int32_t data)
 void remove_all_element_from_linkedlist(void) {
     printk("linked_list_example: removing all nodes\n");
     struct list_head* position = NULL;
+    struct list_head* n = NULL;
     struct mystruct* current_node = NULL;
 
-    list_for_each(position, &my_linked_list) {
+    list_for_each_safe(position, n, &my_linked_list) {
         current_node = list_entry(position, struct mystruct, node);
         list_del(position);
+        kfree(current_node);
     }
 }
 
